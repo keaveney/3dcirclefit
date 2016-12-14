@@ -1,0 +1,6 @@
+To compile and run the code:
+
+
+g++ -c `root-config --cflags` fitCircle.cc
+g++ -o fitcircle `root-config --libs` fitCircle.o
+./fitcircle
