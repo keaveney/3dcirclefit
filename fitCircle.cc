@@ -5,14 +5,13 @@
 #include "TArc.h"
 #include "TVector3.h"
 #include "TPolyMarker3D.h"
+#include "TPolyLine3D.h"
 #include "TFile.h"
 #include "TRandom3.h"
 #include "TVector3.h"
 #include "TH3F.h"
 #include "Math/Functor.h"
-
 #include "Fit/Fitter.h"
-
 
 //____________________________________________________________________
 //void  fitCircle(Int_t n=500) {
@@ -22,11 +21,14 @@ int  main() {
  // c1->SetGrid();    
 
   int n = 1000;
+  int n2 = 10000;
     
   TCanvas *c1 = new TCanvas( "", "", 300, 10, 700, 500 );
 
   std::vector<TVector3*> points;
   TPolyMarker3D *pm3d = new TPolyMarker3D(n);
+  TPolyLine3D *pl3d = new TPolyLine3D(n2);
+
   TH3F *frame3d = new TH3F("frame3d","frame3d",10,-9,9,10,-9,9,10,-9,9);
   frame3d->Draw();
     
@@ -35,12 +37,11 @@ int  main() {
   Double_t r = 5.0;
   Double_t u, v, w, dr;
   TVector3 * point;
-
    
-  for (Int_t i=0;i<n;i++) {
+  for (Int_t i=0;i<n;i++){
   //  r.Circle(x,y,r.Gaus(4,0.1));
     rand.Circle(x,z,r);
-    y = (1.0);
+    y = 1.0;
     point = new TVector3();
     point->SetXYZ(x,y,z);
     points.push_back(point);
@@ -95,14 +96,36 @@ int  main() {
   result.Print(std::cout);
   //Draw the circle on top of the points
     TArc *arc = new TArc(result.Parameter(0),result.Parameter(1),r);
-    arc->SetLineColor(kBlue);
+    arc->SetLineColor(kRed);
     arc->SetLineWidth(1);
     pm3d->Draw("p");
     pm3d->SetMarkerSize( 0.5 );
     pm3d->SetMarkerColor( 2  );
     pm3d->SetMarkerStyle( 3 );
-    pm3d->Draw();
+    //pm3d->Draw();
     //arc->Draw("same");
+    
+
+    
+    Double_t x_fit = result.Parameter(0);            // retrieve the value for the parameter 0
+    Double_t z_fit = result.Parameter(1);            // retrieve the value for the parameter 0
+    Double_t y_fit = result.Parameter(2);            // retrieve the value for the parameter 0
+    Double_t r_fit = result.Parameter(3);            // retrieve the value for the parameter 0
+    
+      for (Int_t i=0;i<n2;i++){
+          double phi_n = i*(6.28/n2);
+          x = r_fit * cos(phi_n)  +  x_fit;
+          z = r_fit * sin(phi_n)  +  z_fit;
+          y = y_fit;
+          std::cout <<"fit points "<< x<<", " << y <<", "<< z<< std::endl;
+          //y = ??
+          pl3d->SetPoint(i,x,y,z);
+      }
+    
+    pl3d->SetLineWidth(2);
+    pl3d->SetLineColor(kBlue);
+    pl3d->Draw();
+
     c1->SaveAs("fit.pdf");
     
     TFile * f = new TFile("fit.root","RECREATE");
